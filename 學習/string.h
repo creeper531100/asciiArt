@@ -7,22 +7,20 @@
 
 using namespace std;
 
-string&& lvalue();
-
 class advstring {
 public:
-	advstring(const string&);
+	advstring(string);
 	advstring operator=(const advstring&);
 	advstring operator+(const advstring&);
 	string upper();
-	string&& __str__();
+	string&& str();
 	string replace(char&&, char&&);
-	vector<string> split(char&&);
+	vector<string> split(string&&);
 	void join(const vector<string>&);
 	void join(const string&);
 	bool possession(char&&);
 private:
-	string str;
+	string str_;
 };
 
 #endif

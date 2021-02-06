@@ -3,9 +3,9 @@
 using namespace std;
 
 
-string input(string&& printstr) {
+string input(string&& print_str) {
 	string scan;
-	cout << printstr;
+	cout << print_str;
 	cin >> scan;
 	return scan;
 }
