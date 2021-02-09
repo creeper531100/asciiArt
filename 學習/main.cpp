@@ -93,7 +93,7 @@ void asciiArt(string inputDir) {
 	time_t c_start, t_start, t_end;
 	VideoCapture cap(inputDir);
 	int error = 0;
-	char lv[] = " .'`^,:;l!i><~+_-?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+	char lv[] = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 	if (!cap.isOpened()) {
 		std::cerr << "ERROR: Could not open video " << inputDir << endl;
 	}
@@ -119,7 +119,7 @@ void asciiArt(string inputDir) {
 	}
 	t_end = time(NULL);
 	int totalTime = difftime(t_end, t_start);
-	printf("used %02d:%02d\nerror:%d", totalTime/60, totalTime%60, error);
+	printf("used %02d:%02d\nerror:%d", totalTime / 60, totalTime % 60, error);
 }
 
 void advart(string inputDir, string saveDir) {
