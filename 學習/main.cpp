@@ -90,35 +90,118 @@ void createJson(string inputDir, const string& outputDir) {
 
 void asciiArt(string inputDir) {
 	string fileName;
+	time_t c_start, t_start, t_end;
 	VideoCapture cap(inputDir);
-	char lv[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,^`'. ";
+	int error = 0;
+	char lv[] = " .'`^,:;l!i><~+_-?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 	if (!cap.isOpened()) {
 		std::cerr << "ERROR: Could not open video " << inputDir << endl;
 	}
 	system("cls");
+	t_start = time(NULL);
 	while (cap.isOpened()) {
-		Mat frame;
+		c_start = clock();
 		string str;
+		Mat frame;
 		cap >> frame;
+		if (frame.empty()) break;
 		resize(frame, frame, Size(237, 62), 0, 0, INTER_CUBIC);
 		cvtColor(frame, frame, COLOR_RGB2GRAY);
 		for (int i = 0; i < 62; i++) {
 			for (int j = 0; j < 237; j++) {
-				str += lv[(int)(frame.at<uchar>(i, j) / 3.9)];
+				str.push_back(lv[frame.at<uchar>(i, j) / 4]);
 			}
-			str += "\n";
+			str.push_back('\n');
 		}
-		cout << str;
-		Sleep(13);
-		if (frame.empty())
-			break;
+		printf("%s", str.c_str());
+		int delay = difftime(clock(), c_start);
+		delay < 30 ? Sleep(30 - delay) : void(error++);
 	}
+	t_end = time(NULL);
+	int totalTime = difftime(t_end, t_start);
+	printf("used %02d:%02d\nerror:%d", totalTime/60, totalTime%60, error);
+}
+
+void advart(string inputDir, string saveDir) {
+	string fileName;
+	string path;
+	time_t t_start, t_end;
+	VideoCapture cap(inputDir);
+	float fps = cap.get(CAP_PROP_FPS);
+	auto count = 0.0, frameCount = cap.get(CAP_PROP_FRAME_COUNT);
+	if (!cap.isOpened()) cerr << "ERROR: Could not open video " << inputDir << endl;
+	VideoWriter writer(saveDir + ".mp4", VideoWriter::fourcc('D', 'I', 'V', 'X')
+		, fps, Size(1008, 560));
+	t_start = time(NULL);
+	while (cap.isOpened()) {
+		Mat frame;
+		cap >> frame;
+		if (frame.empty()) break;//125x35
+		resize(frame, frame, Size(125, 35), 0, 0, INTER_CUBIC);
+		cvtColor(frame, frame, COLOR_RGB2GRAY);
+		Mat R, z;
+		for (int i = 0; i < 35; i++) {
+			z = imread("font\\63.png");
+			for (int j = 0; j < 125; j++) {
+				path = "font\\" + to_string((int)frame.at<uchar>(i, j) / 4) + ".png";
+				hconcat(z, imread(path), z);
+			}
+			R.push_back(z);
+		}
+		writer.write(R);
+		printf("進度: %f%%/%f\r", (count++ / frameCount) * 100, difftime(time(NULL), t_start));
+	}
+	writer.release();
+	t_end = time(NULL);
+	int totalTime = difftime(t_end, t_start);
+	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
+}
+
+void advascii(string inputDir, string saveDir) {
+	time_t t_start, t_end;
+	VideoCapture cap(inputDir);
+	auto count = 0.0,
+		frameCount = cap.get(CAP_PROP_FRAME_COUNT),
+		frameFPS = cap.get(CAP_PROP_FPS);
+	char lv[] = " .'`^,:;l!i><~+_-?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+	Point origin;
+	if (!cap.isOpened()) cerr << "ERROR: Could not open video " << inputDir << endl;
+	VideoWriter writerMp4(saveDir + ".mp4", VideoWriter::fourcc('D', 'I', 'V', 'X')
+		, frameFPS, Size(1920, 1080));
+	t_start = time(NULL);
+	while (cap.isOpened()) {
+		Mat frame;
+		cap >> frame;
+		Mat image = Mat::zeros(Size(1920, 1080), CV_8UC3);
+		image.setTo(Scalar(0, 0, 0));
+		if (frame.empty()) break;//125x35
+		resize(frame, frame, Size(158, 71), 0, 0, INTER_CUBIC);
+		cvtColor(frame, frame, COLOR_RGB2GRAY);
+		origin.y = 5;
+		for (int i = 0; i < 71; i++) {
+			origin.y += 15;
+			for (int j = 0; j < 158; j++) {
+				origin.x += 12;
+				string showStr = convert<string>(lv[frame.at<uchar>(i, j) / 4]);
+				putText(image, showStr, origin, FONT_HERSHEY_SIMPLEX,
+					0.5, Scalar(255, 255, 255),
+					1, 8, 0);
+			}
+			origin.x = 0;
+		}
+		writerMp4.write(image);
+		printf("進度: %f%%/%f\r", (count++ / frameCount) * 100, difftime(time(NULL), t_start));
+	}
+	writerMp4.release();
+	t_end = time(NULL);
+	int totalTime = difftime(t_end, t_start);
+	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
 }
 
 
-int main() {
-	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 (2).Ascii藝術");
-	string file, imgPath, compareImg;
+int main() {	
+	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術(匯出影片) (4).Ascii藝術-2(匯出影片(自訂文字); 不建議使用，除非你對字體有要求)\n輸入:  ");
+	string file, imgPath, compareImg, save;
 	vector<int>getData;
 	switch (convert<int>(getInput)) {
 	case 0:
@@ -127,8 +210,9 @@ int main() {
 		break;
 	case 1:
 		file = input("開啟檔案名稱: ");
+		save = input("請指定儲存名稱: ");
 		compareImg = aHash(imread(file));
-		getData = cmpHash(compareImg, "json\\0.json");
+		getData = cmpHash(compareImg, "json\\" + save + ".json");
 		printf("相似點位: %d, %02d:%02d", getData[1],
 			getData[0] / 30 / 60, getData[0] / 30 % 60);
 		break;
@@ -138,7 +222,13 @@ int main() {
 		break;
 	case 3:
 		file = input("開啟檔案名稱: ");
-		asciiArt(file);
+		save = input("請指定儲存路徑: ");
+		advascii(file, save);
+		break;
+	case 4:
+		file = input("開啟檔案名稱: ");
+		save = input("請指定儲存路徑: ");
+		advart(file, save);
 		break;
 	} 
 }
