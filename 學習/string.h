@@ -7,11 +7,11 @@
 
 using namespace std;
 
-class advstring {
+class Advstring {
 public:
-	advstring(string);
-	advstring operator=(const advstring&);
-	advstring operator+(const advstring&);
+	Advstring(string);
+	Advstring operator=(const Advstring&);
+	Advstring operator+(const Advstring&);
 	string upper();
 	string&& str();
 	string replace(char&&, char&&);

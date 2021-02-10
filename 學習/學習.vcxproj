@@ -143,6 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,12 +156,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="asciiart.cpp" />
+    <ClCompile Include="detection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="operator.cpp" />
+    <ClCompile Include="similar.cpp" />
     <ClCompile Include="string_fun.cpp" />
     <ClCompile Include="tool.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ascii.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="tools.h" />
   </ItemGroup>
