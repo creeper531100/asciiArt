@@ -3,11 +3,11 @@
 
 using namespace std;
 
-advstring::advstring(string str) : str_(std::move(str)) {//init
+Advstring::Advstring(string str) : str_(std::move(str)) {//init
 	this->str_ = str_;
 }
 
-string advstring::upper() { //轉大寫
+string Advstring::upper() { //轉大寫
 	string upper_str;
 	for (auto row : this->str_) {
 		if (row >= 97 && row <= 122)
@@ -18,7 +18,7 @@ string advstring::upper() { //轉大寫
 	return upper_str;
 }
 
-vector<string> advstring::split(string&& delimiter) { //分割特定字元
+vector<string> Advstring::split(string&& delimiter) { //分割特定字元
 	int pos_start = 0, pos_end, delim_len = delimiter.length();
 	vector<string> res;
 
@@ -34,16 +34,16 @@ vector<string> advstring::split(string&& delimiter) { //分割特定字元
 
 
 
-void advstring::join(const vector<string>& new_str) { //加入文字
+void Advstring::join(const vector<string>& new_str) { //加入文字
 	for (const auto& row : new_str)
 		this->str_ += row;
 }
 
-void advstring::join(const string& new_str) {
+void Advstring::join(const string& new_str) {
 	this->str_ += new_str;
 }
 
-string advstring::replace(char&& original_str, char&& replace_str) { //取代文字
+string Advstring::replace(char&& original_str, char&& replace_str) { //取代文字
 	for (auto& row : this->str_) {
 		if (row == original_str)
 			row = replace_str;
@@ -51,7 +51,7 @@ string advstring::replace(char&& original_str, char&& replace_str) { //取代文字
 	return this->str_;
 }
 
-bool advstring::possession(char&& possession_str) { //檢查
+bool Advstring::possession(char&& possession_str) { //檢查
 	for (auto row : this->str_) {
 		if (row == possession_str)
 			return true;
