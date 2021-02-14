@@ -4,15 +4,11 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/bgsegm.hpp>
 #include "ascii.h"
-#include "tools.h"
-#include <windows.h>
-#include <nlohmann/json.hpp>
 
 using namespace cv;
 using namespace dnn;
 using namespace std;
 using namespace bgsegm;
-using json = nlohmann::json;
 
 void AsciiArt::network() {
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
@@ -69,18 +65,19 @@ void AsciiArt::network() {
 }
 
 void AsciiArt::detectionCar1() {
-	VideoCapture capture("C:\\Users\\creep\\OneDrive\\¤å¥ó\\oCam\\A.mp4");
-	Mat frame;
+	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	Mat gray;
 	Mat gray_dilate1;
 	Mat background, foreground, foreground_BW;
 	Mat mid_filer;
 	int num = 0;
 	Mat frame_0;
-	while (1) {
+	while (this->cap.isOpened()) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
-		capture >> frame;
+		
+		Mat frame;
+		this->cap >> frame;
 
 		imshow("frame_resize", frame);
 		cvtColor(frame, gray, COLOR_RGB2GRAY);
@@ -114,9 +111,7 @@ void AsciiArt::detectionCar1() {
 }
 
 void AsciiArt::detectionCar2() {
-
-	VideoCapture capture("D:\\¤U¸ü\\ALIB.mp4");
-	Mat bsmk, frame;
+	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	int count = 0;
 	int locks = 0;
 	int b = 0;
@@ -126,7 +121,9 @@ void AsciiArt::detectionCar2() {
 	while (1) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
-		capture >> frame;
+		Mat bsmk, frame;
+		this->cap >> frame;
+		
 		removeBg->apply(frame, bsmk, 0.01);
 
 		threshold(bsmk, bsmk, 254, 255, 0);

@@ -10,12 +10,13 @@ using namespace dnn;
 using namespace std;
 
 int main() try{
-	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術(匯出影片) (4).Ascii藝術-2(匯出影片(自訂文字); 不建議使用，除非你對字體有要求)\n輸入:  ");
+	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術(匯出影片) (4).Ascii藝術-2(匯出影片(自訂文字); 不建議使用，除非你對字體有要求)\n\
+							\n(5)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 \n輸入:  ");
 	int choice = convert<int>(getInput);
 	string file, imgPath, compareImg, save;
 	vector<int>getData;
 	file = input("開啟檔案名稱: ");
-	if (choice != 0 && choice != 2)
+	if (choice != 0 && choice != 2 && choice != 7 && choice != 8)
 		save = input("請指定儲存名稱: ");
 	AsciiArt ascii_art(file, save);
 	switch (choice) {
