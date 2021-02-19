@@ -76,7 +76,7 @@ void AsciiArt::advascii() {
 	Point origin;
 	VideoWriter writerMp4(this->saveDir_, this->encoding, this->frameFPS, this->setVideoSize);
 	//主程式
-	time_t t_start = time(NULL);
+	const time_t t_start = time(nullptr);
 	while (this->cap.isOpened()) {
 		Mat frame;
 		this->cap >> frame;

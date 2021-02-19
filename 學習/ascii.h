@@ -10,7 +10,7 @@ void createJson(string, string);
 
 class AsciiArt {
 public:
-	AsciiArt(string , string);
+	AsciiArt(string, string);
 	void asciiArt();
 	void advascii();
 	void advart();
@@ -22,7 +22,7 @@ private:
 	string saveDir_;
 	cv::VideoCapture cap;
 	void initVideo(cv::Size setVideoSize = cv::Size(1920, 1080),
-	               cv::Size setDsize = cv::Size(158, 71));
+		cv::Size setDsize = cv::Size(158, 71));
 	string lv;
 	double frameCount;
 	double frameFPS;

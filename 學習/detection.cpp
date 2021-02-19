@@ -11,8 +11,16 @@ using namespace std;
 using namespace bgsegm;
 
 void AsciiArt::network() {
+	enum positive_xy {
+		x0, y0, x1, y1
+	};
+	enum net_forward {
+		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS, NET_X0, NET_Y0, NET_X1, NET_Y1
+	};
+	
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
-	setUseOptimized(1);
+	
+	setUseOptimized(true);
 	int count = 0;
 	vector<vector<int>> point;
 	vector<int> xy, numArr;
@@ -30,26 +38,24 @@ void AsciiArt::network() {
 			Mat inputBlob = blobFromImage(mat, 1.0, mat.size(), Scalar(104.0, 177.0, 123.0), false);
 			net.setInput(inputBlob, "data");
 			Mat detection = net.forward();
-			Mat detectionMat(detection.size[2], detection.size[3], CV_32F, (float*)detection.data);
-			float confidenceThreshould = 0.75;
+			Mat detectionMat(detection.size[NET_ROWS], detection.size[NET_COLS], CV_32F, (float*)detection.data);
 			for (int i = 0; i < detectionMat.rows; i++) {
-				float confidence = detectionMat.at<float>(i, 2);
-				if (confidence > confidenceThreshould) {
-					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, 3) * mat.cols));
-					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, 4) * mat.rows));
-					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, 5) * mat.cols));
-					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, 6) * mat.rows));
+				float confidence = detectionMat.at<float>(i, NET_SIMILAR);
+				if (confidence > 0.75) {
+					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, NET_X0) * mat.cols));
+					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, NET_Y0) * mat.rows));
+					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, NET_X1) * mat.cols));
+					xy.emplace_back(static_cast<int>(detectionMat.at<float>(i, NET_Y1) * mat.rows));
 					point.emplace_back(xy);
 					xy.clear();
 					numArr.emplace_back(num++);
 				}
 			}
 		}
-		//x0 = 0, y0 = 1, x1 = 2, y1 = 3;
 		for (auto row : point) try {
 			Mat smallImage;
-			resize(imgs, smallImage, Size(row[2] - row[0], row[3] - row[1]));
-			Rect roi(Point(row[0], row[1]), Size(smallImage.cols, smallImage.rows));
+			resize(imgs, smallImage, Size(row[x1] - row[x0], row[y1] - row[y0]));
+			Rect roi(Point(row[x0], row[y0]), Size(smallImage.cols, smallImage.rows));
 			Mat destinationROI = mat(roi);
 			smallImage.copyTo(destinationROI);
 		}
@@ -113,8 +119,8 @@ void AsciiArt::detectionCar1() {
 void AsciiArt::detectionCar2() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	int count = 0;
-	int locks = 0;
-	int b = 0;
+	int lastCount = 0;
+	int carCount = 0;
 	bool meichongfu = true;
 
 	Ptr<BackgroundSubtractor> removeBg = createBackgroundSubtractorMOG2(5, 30, true);
@@ -128,16 +134,17 @@ void AsciiArt::detectionCar2() {
 
 		threshold(bsmk, bsmk, 254, 255, 0);
 		medianBlur(bsmk, bsmk, 5);//第二次除噪降低雜訊
-
+		
 		Mat element = getStructuringElement(MORPH_RECT, Size(8, 5));
 		dilate(bsmk, bsmk, element);
+		
 		medianBlur(bsmk, bsmk, 5);//第二次除噪降低雜訊
-
+		
 		line(frame, Point(0, 520), Point(600, 520), Scalar(255, 0, 255), 1, LINE_AA);
 
 		findContours(bsmk, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 		vector<Rect> boundRect(contours.size());
-		int a = 0;
+		int lineCount = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			boundRect[i] = boundingRect(contours[i]);
 			if (boundRect[i].width > 55 && boundRect[i].height > 55) {
@@ -146,25 +153,25 @@ void AsciiArt::detectionCar2() {
 				putText(frame, "num:" + to_string(i + 1), Point(boundRect[i].x, boundRect[i].y), FONT_HERSHEY_COMPLEX,
 					1, Scalar(0, 255, 0));
 				if (boundRect[i].y + boundRect[i].width / 2 > 520)
-					a++;
+					lineCount++;
 			}
 		}
-		if (locks != a) {
-			if (a > 1) {
-				b = b + (a - locks);
-				locks = a;
-				meichongfu = false;
+		if (lastCount != lineCount) {//假如車輛有變動
+			if (lineCount > 1) {//假如汽車大於2輛
+				carCount = carCount + (lineCount - lastCount); //將上次的數量減掉這次的數量
+				lastCount = lineCount; // lineCount 復值 lastCount
+				meichongfu = false;//確認沒重複
 			}
-			else if (meichongfu) {
-				locks = a;
-				b += locks;
+			else if (meichongfu) {//假如沒重複
+				lastCount = lineCount;// lineCount 復值 lastCount
+				carCount += lastCount;//數量增加
 			}
 			else {
-				locks -= a;
-				meichongfu = true;
+				lastCount -= lineCount;//如果上次超過兩輛，需要將lastCount賦歸
+				meichongfu = true;//確認有重複
 			}
 		}
-		putText(frame, to_string(b), Point(20, 20), FONT_HERSHEY_COMPLEX,
+		putText(frame, to_string(carCount), Point(20, 20), FONT_HERSHEY_COMPLEX,
 			1, Scalar(0, 255, 0));
 
 		imshow("gray_dilate1", frame);

@@ -17,11 +17,11 @@ string aHash(Mat img) {
 	int s = 0;
 	int avg = 0;
 	string hash_str = "";
-	resize(img, imgresize, Size(16, 9), 0, 0, INTER_CUBIC);
+	resize(img, imgresize, Size(16, 9));
 	cvtColor(imgresize, gray, COLOR_RGB2GRAY);
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 16; j++) {
-			s += s += static_cast<int>(gray.at<uchar>(i, j));
+			s += static_cast<int>(gray.at<uchar>(i, j));
 		}
 	}
 	avg = s / 144;
@@ -47,25 +47,29 @@ vector<int> cmpHash(string hash1, string hash2) {
 		n = 0;
 		for (int i = 0; i < hash1.length(); i++) {
 			n += hash1[i] ^ row[i];
-			maps[j] = n;
 		}
-		j++;
+		maps[j++] = n;
 	}
 
-	for (auto& row : maps)
+	for (auto& row : maps) {
 		pairs.emplace_back(row);
+	}
 
 	sort(pairs.begin(), pairs.end(), [=](pair<int, int>& a, pair<int, int>& b)
 		{
 			return a.second < b.second;
 		}
 	);
+	for (auto& row : pairs) {
+		pairs.emplace_back(row);
+	}
+
 	returnData[0] = pairs[0].first;
 	returnData[1] = pairs[0].second;
 	return returnData;
 }
-
 void createJson(string inputDir, string outputDir) {
+	string outDir = outputDir;
 	json jsonfile;
 	vector<string> indexPath;
 	string fileName;
@@ -83,7 +87,7 @@ void createJson(string inputDir, string outputDir) {
 		indexPath.emplace_back(aHash(frame));
 	}
 	jsonfile["HashMap"] = indexPath;
-	ofstream file(outputDir);
+	ofstream file(outDir, fstream::out);
 	file << jsonfile;
 	file.close();
 }
