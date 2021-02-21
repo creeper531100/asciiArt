@@ -1,6 +1,7 @@
 #pragma once
+#include <opencv2/opencv.hpp>
 #ifndef ASCIIART_H 
-#define ASCIIART_H 
+#define ASCIIART_H
 
 using namespace std;
 
@@ -31,5 +32,4 @@ private:
 	cv::Size getVideoSize;
 	cv::Size dsize;
 };
-
 #endif

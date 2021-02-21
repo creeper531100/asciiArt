@@ -45,6 +45,9 @@
     <ClCompile Include="detection.cpp">
       <Filter>video_process</Filter>
     </ClCompile>
+    <ClCompile Include="initData.cpp">
+      <Filter>video_process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="string.h">
@@ -54,6 +57,9 @@
       <Filter>tools</Filter>
     </ClInclude>
     <ClInclude Include="ascii.h">
+      <Filter>video_process</Filter>
+    </ClInclude>
+    <ClInclude Include="initData.h">
       <Filter>video_process</Filter>
     </ClInclude>
   </ItemGroup>

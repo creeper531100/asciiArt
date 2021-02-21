@@ -1,6 +1,4 @@
-﻿#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
-#include <iostream>
+﻿#include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/bgsegm.hpp>
 #include "ascii.h"

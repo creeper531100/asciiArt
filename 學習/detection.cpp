@@ -1,14 +1,17 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/bgsegm.hpp>
 #include "ascii.h"
+#include "initData.h"
 
 using namespace cv;
 using namespace dnn;
 using namespace std;
 using namespace bgsegm;
+using json = nlohmann::json;
 
 void AsciiArt::network() {
 	enum positive_xy {
@@ -72,6 +75,8 @@ void AsciiArt::network() {
 
 void AsciiArt::detectionCar1() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
+
+	
 	Mat gray;
 	Mat gray_dilate1;
 	Mat background, foreground, foreground_BW;
@@ -118,41 +123,44 @@ void AsciiArt::detectionCar1() {
 
 void AsciiArt::detectionCar2() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
+	formatJsonData getData;
+	getData.initData();
+	
 	int count = 0;
 	int lastCount = 0;
 	int carCount = 0;
 	bool meichongfu = true;
 
-	Ptr<BackgroundSubtractor> removeBg = createBackgroundSubtractorMOG2(5, 30, true);
+	Ptr<BackgroundSubtractor> removeBg = createBackgroundSubtractorMOG2(getData.getHistory, getData.getVarThreshould, getData.getDetectShadows);
 	while (1) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
 		Mat bsmk, frame;
 		this->cap >> frame;
 		
-		removeBg->apply(frame, bsmk, 0.01);
+		removeBg->apply(frame, bsmk, getData.getLearningRate);
 
 		threshold(bsmk, bsmk, 254, 255, 0);
-		medianBlur(bsmk, bsmk, 5);//第二次除噪降低雜訊
+		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize1);//第二次除噪降低雜訊
 		
-		Mat element = getStructuringElement(MORPH_RECT, Size(8, 5));
+		Mat element = getStructuringElement(MORPH_RECT, Size(getData.getElementKsizeWidth, getData.getElementKsizeHeight));
 		dilate(bsmk, bsmk, element);
 		
-		medianBlur(bsmk, bsmk, 5);//第二次除噪降低雜訊
+		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize2);//第二次除噪降低雜訊
 		
-		line(frame, Point(0, 520), Point(600, 520), Scalar(255, 0, 255), 1, LINE_AA);
+		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeight), Scalar(getData.getColorG, getData.getColorB, getData.getColorR), 1, LINE_AA);
 
 		findContours(bsmk, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 		vector<Rect> boundRect(contours.size());
 		int lineCount = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			boundRect[i] = boundingRect(contours[i]);
-			if (boundRect[i].width > 55 && boundRect[i].height > 55) {
-				rectangle(frame, boundRect[i], Scalar(0, 255, 0));
-				line(frame, Point(boundRect[i].x, boundRect[i].y + boundRect[i].width / 2), Point(boundRect[i].x + boundRect[i].height, boundRect[i].y + boundRect[i].width / 2), Scalar(255, 0, 255), 1, LINE_AA);
+			if (boundRect[i].width > getData.getDetectRangeWidth && boundRect[i].height > getData.getDetectRangeHeight) {
+				rectangle(frame, boundRect[i], Scalar(getData.getColorR, getData.getColorG, getData.getColorB));
+				line(frame, Point(boundRect[i].x, boundRect[i].y + boundRect[i].width / 2), Point(boundRect[i].x + boundRect[i].height, boundRect[i].y + boundRect[i].width / 2), Scalar(getData.getColorG, getData.getColorB, getData.getColorR), 1, LINE_AA);
 				putText(frame, "num:" + to_string(i + 1), Point(boundRect[i].x, boundRect[i].y), FONT_HERSHEY_COMPLEX,
-					1, Scalar(0, 255, 0));
-				if (boundRect[i].y + boundRect[i].width / 2 > 520)
+					1, Scalar(getData.getColorR, getData.getColorG, getData.getColorB));
+				if (boundRect[i].y + boundRect[i].width / 2 > getData.getTriggerLineHeight)
 					lineCount++;
 			}
 		}
@@ -171,11 +179,11 @@ void AsciiArt::detectionCar2() {
 				meichongfu = true;//確認有重複
 			}
 		}
-		putText(frame, to_string(carCount), Point(20, 20), FONT_HERSHEY_COMPLEX,
+		putText(frame, to_string(carCount), Point(getData.getPutTextX, getData.getPutTextY), FONT_HERSHEY_COMPLEX,
 			1, Scalar(0, 255, 0));
 
 		imshow("gray_dilate1", frame);
-		waitKey(1);
+		waitKey(getData.getWaitKey);
 		count++;
 	}
 }

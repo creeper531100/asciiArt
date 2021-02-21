@@ -158,6 +158,7 @@
   <ItemGroup>
     <ClCompile Include="asciiart.cpp" />
     <ClCompile Include="detection.cpp" />
+    <ClCompile Include="initData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="operator.cpp" />
     <ClCompile Include="similar.cpp" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ascii.h" />
+    <ClInclude Include="initData.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="tools.h" />
   </ItemGroup>
