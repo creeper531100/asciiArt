@@ -18,7 +18,7 @@ void AsciiArt::network() {
 		x0, y0, x1, y1
 	};
 	enum net_forward {
-		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS, NET_X0, NET_Y0, NET_X1, NET_Y1
+		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS = 3 , NET_X0 = 3, NET_Y0, NET_X1, NET_Y1
 	};
 	
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
@@ -28,6 +28,8 @@ void AsciiArt::network() {
 	vector<vector<int>> point;
 	vector<int> xy, numArr;
 	Mat imgs = imread("face.png");
+
+	
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	VideoWriter writerMp4(this->saveDir_, this->encoding, this->frameFPS, this->getVideoSize);
 	while (this->cap.isOpened()) {
@@ -41,7 +43,7 @@ void AsciiArt::network() {
 			Mat inputBlob = blobFromImage(mat, 1.0, mat.size(), Scalar(104.0, 177.0, 123.0), false);
 			net.setInput(inputBlob, "data");
 			Mat detection = net.forward();
-			Mat detectionMat(detection.size[NET_ROWS], detection.size[NET_COLS], CV_32F, (float*)detection.data);
+			Mat detectionMat(detection.size[2], detection.size[3], CV_32F, (float*)detection.data);
 			for (int i = 0; i < detectionMat.rows; i++) {
 				float confidence = detectionMat.at<float>(i, NET_SIMILAR);
 				if (confidence > 0.75) {

@@ -1,70 +1,84 @@
-import tkinter as tk
-import json
+import os
+import time
+from tkinter import *
+from tkinter.filedialog import askopenfile
+from tkinter.scrolledtext import ScrolledText
+from tkinter.messagebox import *
 
-window = tk.Tk()
-window.title('設定APP')
-window.geometry('400x500')
-window.configure(background='white')
-settingVal = []
-setting = []
-defaultVal = [55,55,520,0,600,5,30,True,0.01,8,5,5,5,20,20,1,0,255,0]
-settingLable = {
-    "detectRangeWidth": "最低偵測寬度",
-    "detectRangeHeight": "最低偵測高度",
-    "triggerLineHeight": "觸發高度",
-    "startTriggerLineWidth": "起始線位置",
-    "endTriggerLineWidth": "終點線位置",
-    "history": "學習張數",
-    "varThreshould": "光影敏感度",
-    "detectShadows": "影子偵測",
-    "learningRate": "學習時間",
-    "elementKsizeWidth": "拉伸寬度",
-    "elementKsizeHeight": "拉伸長度",
-    "medianBlurKsize1": "第一次抹平等級",
-    "medianBlurKsize2": "第二次抹平等級",
-    "putTextX": "文字X位置",
-    "putTextY": "文字Y位置",
-    "waitKey": "影片播放速度",
-    "colorR": "R",
-    "colorG": "G",
-    "colorB": "B"
-}
+tk = Tk()
+tk.title(".py -> .exe")
+tk.resizable(0, 0)
 
+f = None
 
-def calculate_bmi_number():
-    for i, row in enumerate(settingLable):
-        if row == "detectShadows":
-            settingLable[row] = bool(settingVal[i].get())
-        elif row == "learningRate":
-            settingLable[row] = float(settingVal[i].get())
-        else:
-            settingLable[row] = int(settingVal[i].get())
-    with open("setting.json", "w", encoding="utf8") as f:
-        json.dump(settingLable, f)
+def browse():
+    global f, btn
+    try:
+        f = askopenfile().name # get the py file
+        btn["text"] = os.path.basename(f)
+    except:
+        f = None
 
-    print(settingLable)
-
-
-
-def main():
-    header_label = tk.Label(window, text='設置SETTING')
-    header_label.pack()
-    for i, row in enumerate(settingLable):
-        setting.append(tk.Frame(window))
-        setting[i].pack(side=tk.TOP)
-        tk.Label(setting[i], text=settingLable[row] + ", " + row).pack(side=tk.LEFT)
-        settingVal.append(tk.Entry(setting[i]))
-        settingVal[i].insert(0, defaultVal[i])
-        settingVal[i].pack(side=tk.LEFT)
-
-    result_label = tk.Label(window)
-    result_label.pack()
-
-    calculate_btn = tk.Button(window, text='哈哈', command=calculate_bmi_number)
-    calculate_btn.pack()
-
-    window.mainloop()
+def convert():
+    global f, btn, ver, des
+    OK = False
+    try:
+        dots = 0
+        for x in ver.get(): # check the number of dots in version
+            if x == ".":
+                dots += 1
+            else:
+                x = int(x)
+        if dots < 4:
+            OK = True
+    except:
+        showwarning("","The version must be int.int.int... with max 3 dots.")
+    if OK:
+        try:
+            if f is None:
+                showwarning("","You must choose a file to convert.")
+                btn.focus()
+            elif ver.get() == "":
+                showwarning("","You must enter a version.")
+                ver.focus()
+            else:
+                with open("setup.py", "w") as f_: # fill a new file setup.py (installer)
+                    f_.write("NAME = '" + f +
+                        "'\nVERSION = '" + ver.get() +
+                        "'\nDESCRIPTION = \"\"\"" + des.get(1.0, "end") +
+                        "\"\"\"\nFILENAME = '" + f +
+                        "'\n\nfrom cx_Freeze import setup, Executable\nsetup(name = NAME, version = VERSION, description = DESCRIPTION, executables = [Executable(FILENAME)])")
+                with open("setup.bat", "w") as f_: # fill a new file setup.bat (installation launcher)
+                    f_.write("py setup.py build")
+                os.system("setup.bat")
+                btn["text"] = "Browse..."
+                f = None
+                os.remove("setup.py")  # remove files created in this script
+                os.remove("setup.bat") #
+                showinfo("Information","End. Your exe file is in folder 'build'.")
+        except:
+            showerror("Error","Error detected.")
 
 
-if __name__ == '__main__':
-    main()
+# create GUI
+
+Label(text="File to convert").grid(column=0, row=0, sticky="w")
+
+btn = Button(text="Browse...", command=browse)
+btn.grid(column=1, row=0)
+
+Label(text="Version").grid(column=0, row=2, sticky="w")
+
+ver = Entry()
+ver.grid(column=1, row=2, padx=5)
+
+Label(text="Description").grid(column=0, row=3, sticky="w")
+
+des = ScrolledText(width=15, height=5, wrap=WORD)
+des.grid(column=1, row=3)
+
+Label(text="Convert to .exe").grid(column=0, row=4, sticky="w")
+
+Button(text="Convert", command=convert).grid(column=1, row=4, pady=5)
+
+tk.mainloop()
