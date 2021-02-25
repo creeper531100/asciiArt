@@ -1,9 +1,6 @@
 #include <iostream>
 
-
 using namespace std;
-
-
 
 string input(string&& print_str) {
 	string scan;

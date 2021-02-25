@@ -1,6 +1,5 @@
 ﻿#include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
-
 #include "ascii.h"
 #include "string.h"
 #include "tools.h"
@@ -29,7 +28,7 @@ int main() try {
 	string file, imgPath, compareImg, save;
 	vector<int>getData;
 	file = input("開啟檔案名稱: ");
-
+	
 	if (switchVal != CREATE_JSON &&
 		switchVal != ASCIIART &&
 		switchVal != COMPARE_IMG &&

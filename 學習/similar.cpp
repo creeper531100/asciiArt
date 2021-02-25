@@ -1,6 +1,5 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <opencv2/imgproc.hpp>
 #include "tools.h"
 #include "string.h"
 #include <nlohmann/json.hpp>

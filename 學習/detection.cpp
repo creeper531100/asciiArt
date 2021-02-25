@@ -1,5 +1,3 @@
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -20,16 +18,13 @@ void AsciiArt::network() {
 	enum net_forward {
 		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS = 3 , NET_X0 = 3, NET_Y0, NET_X1, NET_Y1
 	};
-	
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
-	
 	setUseOptimized(true);
 	int count = 0;
 	vector<vector<int>> point;
 	vector<int> xy, numArr;
 	Mat imgs = imread("face.png");
 
-	
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	VideoWriter writerMp4(this->saveDir_, this->encoding, this->frameFPS, this->getVideoSize);
 	while (this->cap.isOpened()) {
@@ -77,8 +72,6 @@ void AsciiArt::network() {
 
 void AsciiArt::detectionCar1() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
-
-	
 	Mat gray;
 	Mat gray_dilate1;
 	Mat background, foreground, foreground_BW;
@@ -88,19 +81,16 @@ void AsciiArt::detectionCar1() {
 	while (this->cap.isOpened()) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
-		
 		Mat frame;
 		this->cap >> frame;
-
 		imshow("frame_resize", frame);
 		cvtColor(frame, gray, COLOR_RGB2GRAY);
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < 10; ++i) 
 			medianBlur(gray, gray, 5);//N次除噪
-		}
-
-		if (num == 0) {
+		
+		if (num == 0) 
 			background = gray.clone();
-		}
+		
 		absdiff(gray, background, foreground);
 
 		Mat element = getStructuringElement(MORPH_RECT, Size(3, 2));
@@ -132,13 +122,13 @@ void AsciiArt::detectionCar2() {
 	int lastCount = 0;
 	int carCount = 0;
 	bool meichongfu = true;
-
 	Ptr<BackgroundSubtractor> removeBg = createBackgroundSubtractorMOG2(getData.getHistory, getData.getVarThreshould, getData.getDetectShadows);
 	while (1) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
 		Mat bsmk, frame;
 		this->cap >> frame;
+		Scalar setColor = Scalar(getData.getColorR, getData.getColorG, getData.getColorB);
 		
 		removeBg->apply(frame, bsmk, getData.getLearningRate);
 
@@ -149,23 +139,43 @@ void AsciiArt::detectionCar2() {
 		dilate(bsmk, bsmk, element);
 		
 		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize2);//第二次除噪降低雜訊
-		
+
+		//繪製辨識區域
 		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeight), Scalar(getData.getColorG, getData.getColorB, getData.getColorR), 1, LINE_AA);
+		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeightEnd), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorB, getData.getColorG, getData.getColorR), 1, LINE_AA);
+		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorG, getData.getColorR, getData.getColorR), 1, LINE_AA);
+		line(frame, Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorG, getData.getColorR, getData.getColorR), 1, LINE_AA);
 
 		findContours(bsmk, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 		vector<Rect> boundRect(contours.size());
+		
+		auto isCarinRange = [&](int index)-> bool {
+			return boundRect[index].y + boundRect[index].width / 2 > getData.getTriggerLineHeight &&
+				   boundRect[index].y + boundRect[index].width / 2 < getData.getTriggerLineHeightEnd &&
+				   boundRect[index].x > getData.getStartTriggerLineWidth && 
+				   boundRect[index].x < getData.getEndTriggerLineWidth;
+		};
+		auto isRect = [&](int index) -> bool {
+			return boundRect[index].width > getData.getDetectRangeWidth && boundRect[index].height > getData.getDetectRangeHeight;
+		};
+		
 		int lineCount = 0;
 		for (int i = 0; i < contours.size(); i++) {
 			boundRect[i] = boundingRect(contours[i]);
-			if (boundRect[i].width > getData.getDetectRangeWidth && boundRect[i].height > getData.getDetectRangeHeight) {
-				rectangle(frame, boundRect[i], Scalar(getData.getColorR, getData.getColorG, getData.getColorB));
-				line(frame, Point(boundRect[i].x, boundRect[i].y + boundRect[i].width / 2), Point(boundRect[i].x + boundRect[i].height, boundRect[i].y + boundRect[i].width / 2), Scalar(getData.getColorG, getData.getColorB, getData.getColorR), 1, LINE_AA);
+			if (isRect(i)) {
+				Point p1 = Point(boundRect[i].x, boundRect[i].y + boundRect[i].width / 2);
+				Point p2 = Point(boundRect[i].x + boundRect[i].height, boundRect[i].y + boundRect[i].width / 2);
+
+				rectangle(frame, boundRect[i], setColor);
+				line(frame, p1, p2, setColor, 1, LINE_AA);
 				putText(frame, "num:" + to_string(i + 1), Point(boundRect[i].x, boundRect[i].y), FONT_HERSHEY_COMPLEX,
-					1, Scalar(getData.getColorR, getData.getColorG, getData.getColorB));
-				if (boundRect[i].y + boundRect[i].width / 2 > getData.getTriggerLineHeight)
+					1, setColor);
+				if (isCarinRange(i))
 					lineCount++;
 			}
 		}
+
+		
 		if (lastCount != lineCount) {//假如車輛有變動
 			if (lineCount > 1) {//假如汽車大於2輛
 				carCount = carCount + (lineCount - lastCount); //將上次的數量減掉這次的數量

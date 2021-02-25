@@ -19,15 +19,11 @@ saveDir_(std::move(saveDir)) {
 	this->lv = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 }
 
-void AsciiArt::initVideo(Size setVideoSize, Size setDsize)
-{
+void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	setUseOptimized(1);
 	VideoCapture cap(this->inputDir_);
-	int error = 0;
-	char lv[] = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-	if (!cap.isOpened()) {
+	if (!cap.isOpened())
 		std::cerr << "ERROR: Could not open video " << this->inputDir_ << endl;
-	}
 	system("cls");
 	this->cap = cap;
 	this->frameCount = cap.get(CAP_PROP_FRAME_COUNT);		   //設置總張數
@@ -37,8 +33,6 @@ void AsciiArt::initVideo(Size setVideoSize, Size setDsize)
 	this->getVideoSize = Size(cap.get(CAP_PROP_FRAME_WIDTH), cap.get(CAP_PROP_FRAME_HEIGHT));//設置影片解析度
 	this->dsize = setDsize;			   //設置壓縮解析度
 }
-
-
 
 void AsciiArt::asciiArt() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), Size(237, 62));
