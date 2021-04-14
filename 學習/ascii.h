@@ -19,8 +19,9 @@ public:
 	void detectionCar1();
 	void detectionCar2();
 private:
-	string inputDir_;
-	string saveDir_;
+	string inputDir;
+	string saveDir;
+	string run;
 	cv::VideoCapture cap;
 	void initVideo(cv::Size setVideoSize = cv::Size(1920, 1080),
 		cv::Size setDsize = cv::Size(158, 71));

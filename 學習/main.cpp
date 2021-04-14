@@ -1,5 +1,4 @@
 ﻿#include <opencv2/opencv.hpp>
-#include <opencv2/dnn.hpp>
 #include "ascii.h"
 #include "string.h"
 #include "tools.h"

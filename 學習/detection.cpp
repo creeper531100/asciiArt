@@ -1,14 +1,12 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-#include <opencv2/bgsegm.hpp>
 #include "ascii.h"
 #include "initData.h"
 
 using namespace cv;
 using namespace dnn;
 using namespace std;
-using namespace bgsegm;
 using json = nlohmann::json;
 
 void AsciiArt::network() {
@@ -16,7 +14,7 @@ void AsciiArt::network() {
 		x0, y0, x1, y1
 	};
 	enum net_forward {
-		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS = 3 , NET_X0 = 3, NET_Y0, NET_X1, NET_Y1
+		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS = 3, NET_X0 = 3, NET_Y0, NET_X1, NET_Y1
 	};
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
 	setUseOptimized(true);
@@ -26,7 +24,7 @@ void AsciiArt::network() {
 	Mat imgs = imread("face.png");
 
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
-	VideoWriter writerMp4(this->saveDir_, this->encoding, this->frameFPS, this->getVideoSize);
+	VideoWriter writerMp4(this->saveDir, this->encoding, this->frameFPS, this->getVideoSize);
 	while (this->cap.isOpened()) {
 		Mat mat;
 		this->cap >> mat;
@@ -64,7 +62,7 @@ void AsciiArt::network() {
 		}
 		imshow("mat", mat);
 		waitKey(1);
-		printf("¶i«×: %f%%\r", (count++ / this->frameCount) * 100);
+		printf("é€²åº¦: %f%%\r", (count++ / this->frameCount) * 100);
 		writerMp4.write(mat);
 	}
 	writerMp4.release();
@@ -85,18 +83,18 @@ void AsciiArt::detectionCar1() {
 		this->cap >> frame;
 		imshow("frame_resize", frame);
 		cvtColor(frame, gray, COLOR_RGB2GRAY);
-		for (int i = 0; i < 10; ++i) 
-			medianBlur(gray, gray, 5);//N¦¸°£¾¸
-		
-		if (num == 0) 
+		for (int i = 0; i < 10; ++i)
+			medianBlur(gray, gray, 5);//Næ¬¡é™¤å™ª
+
+		if (num == 0)
 			background = gray.clone();
-		
+
 		absdiff(gray, background, foreground);
 
 		Mat element = getStructuringElement(MORPH_RECT, Size(3, 2));
 
 		threshold(foreground, foreground_BW, 20, 255, 0);
-		medianBlur(foreground_BW, mid_filer, 5);//²Ä¤G¦¸°£¾¸¡A¤G­È¤Æ»İ­n¥h°£¾¸ÂI
+		medianBlur(foreground_BW, mid_filer, 5);//ç¬¬äºŒæ¬¡é™¤å™ªï¼ŒäºŒå€¼åŒ–éœ€è¦å»é™¤å™ªé»
 
 		dilate(mid_filer, gray_dilate1, element);
 
@@ -117,85 +115,88 @@ void AsciiArt::detectionCar2() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT));
 	formatJsonData getData;
 	getData.initData();
-	
 	int count = 0;
 	int lastCount = 0;
+	bool chongfu = true;
 	int carCount = 0;
-	bool meichongfu = true;
+
 	Ptr<BackgroundSubtractor> removeBg = createBackgroundSubtractorMOG2(getData.getHistory, getData.getVarThreshould, getData.getDetectShadows);
-	while (1) {
+	while (this->cap.isOpened()) {
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
 		Mat bsmk, frame;
 		this->cap >> frame;
+		if (frame.empty()) break;
 		Scalar setColor = Scalar(getData.getColorR, getData.getColorG, getData.getColorB);
-		
 		removeBg->apply(frame, bsmk, getData.getLearningRate);
-
 		threshold(bsmk, bsmk, 254, 255, 0);
-		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize1);//²Ä¤G¦¸°£¾¸­°§CÂø°T
-		
+		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize1);//ç¬¬äºŒæ¬¡é™¤å™ªé™ä½é›œè¨Š
 		Mat element = getStructuringElement(MORPH_RECT, Size(getData.getElementKsizeWidth, getData.getElementKsizeHeight));
 		dilate(bsmk, bsmk, element);
-		
-		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize2);//²Ä¤G¦¸°£¾¸­°§CÂø°T
-
-		//Ã¸»s¿ëÃÑ°Ï°ì
-		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeight), Scalar(getData.getColorG, getData.getColorB, getData.getColorR), 1, LINE_AA);
-		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeightEnd), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorB, getData.getColorG, getData.getColorR), 1, LINE_AA);
-		line(frame, Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getStartTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorG, getData.getColorR, getData.getColorR), 1, LINE_AA);
-		line(frame, Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeight), Point(getData.getEndTriggerLineWidth, getData.getTriggerLineHeightEnd), Scalar(getData.getColorG, getData.getColorR, getData.getColorR), 1, LINE_AA);
+		medianBlur(bsmk, bsmk, getData.getMedianBlurKsize2);//ç¬¬äºŒæ¬¡é™¤å™ªé™ä½é›œè¨Š
+		//ç¹ªè£½è¾¨è­˜è®Šæ•¸
+		int x0 = getData.getStartTriggerLineWidth;
+		int x1 = getData.getEndTriggerLineWidth;
+		int y0 = getData.getTriggerLineHeight;
+		int y1 = getData.getTriggerLineHeightEnd;
+		//ç¹ªè£½è¾¨è­˜å€åŸŸ
+		line(frame, Point(x0, y0), Point(x1, y0), setColor, 1, LINE_AA);
+		line(frame, Point(x0, y1), Point(x1, y1), setColor, 1, LINE_AA);
+		line(frame, Point(x0, y0), Point(x0, y1), setColor, 1, LINE_AA);
+		line(frame, Point(x1, y0), Point(x1, y1), setColor, 1, LINE_AA);
 
 		findContours(bsmk, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 		vector<Rect> boundRect(contours.size());
-		
 		auto isCarinRange = [&](int index)-> bool {
 			return boundRect[index].y + boundRect[index].width / 2 > getData.getTriggerLineHeight &&
-				   boundRect[index].y + boundRect[index].width / 2 < getData.getTriggerLineHeightEnd &&
-				   boundRect[index].x > getData.getStartTriggerLineWidth && 
-				   boundRect[index].x < getData.getEndTriggerLineWidth;
+				boundRect[index].y + boundRect[index].width / 2 < getData.getTriggerLineHeightEnd &&
+				boundRect[index].x > getData.getStartTriggerLineWidth &&
+				boundRect[index].x < getData.getEndTriggerLineWidth;
 		};
 		auto isRect = [&](int index) -> bool {
 			return boundRect[index].width > getData.getDetectRangeWidth && boundRect[index].height > getData.getDetectRangeHeight;
 		};
+		auto calcPoint = [&](int index) {
+			int cx = boundRect[index].x + boundRect[index].width / 2;
+			int cy = boundRect[index].y + boundRect[index].height / 2;
+			return Point(cx, cy);
+		};
 		
 		int lineCount = 0;
+		
 		for (int i = 0; i < contours.size(); i++) {
 			boundRect[i] = boundingRect(contours[i]);
 			if (isRect(i)) {
-				Point p1 = Point(boundRect[i].x, boundRect[i].y + boundRect[i].width / 2);
-				Point p2 = Point(boundRect[i].x + boundRect[i].height, boundRect[i].y + boundRect[i].width / 2);
-
+				Point pt = calcPoint(i);
+				line(frame, pt, Point(pt.x, y0), setColor, 1, LINE_AA);
+				putText(frame, "id: " + to_string(i + 1)+ ": " + to_string((y0 - boundRect[i].y)) + "unit", Point(boundRect[i].x, boundRect[i].y), FONT_HERSHEY_COMPLEX, 0.5, Scalar(255, 0, 0));
 				rectangle(frame, boundRect[i], setColor);
-				line(frame, p1, p2, setColor, 1, LINE_AA);
-				putText(frame, "num:" + to_string(i + 1), Point(boundRect[i].x, boundRect[i].y), FONT_HERSHEY_COMPLEX,
-					1, setColor);
 				if (isCarinRange(i))
 					lineCount++;
 			}
 		}
-
 		
-		if (lastCount != lineCount) {//°²¦p¨®½ø¦³ÅÜ°Ê
-			if (lineCount > 1) {//°²¦p¨T¨®¤j©ó2½ø
-				carCount = carCount + (lineCount - lastCount); //±N¤W¦¸ªº¼Æ¶q´î±¼³o¦¸ªº¼Æ¶q
-				lastCount = lineCount; // lineCount ´_­È lastCount
-				meichongfu = false;//½T»{¨S­«½Æ
+		if (lastCount != lineCount) {//å‡å¦‚è»Šè¼›æœ‰è®Šå‹•
+			if (lineCount > 1) {//å‡å¦‚æ±½è»Šå¤§æ–¼2è¼›
+				carCount = carCount + (lineCount - lastCount); //å°‡ä¸Šæ¬¡çš„æ•¸é‡æ¸›æ‰é€™æ¬¡çš„æ•¸é‡
+				chongfu = false;//ç¢ºèªé‡è¤‡
 			}
-			else if (meichongfu) {//°²¦p¨S­«½Æ
-				lastCount = lineCount;// lineCount ´_­È lastCount
-				carCount += lastCount;//¼Æ¶q¼W¥[
+			else if (chongfu) {//å‡å¦‚é‡è¤‡	
+				carCount += lineCount;//æ•¸é‡å¢åŠ 
 			}
 			else {
-				lastCount -= lineCount;//¦pªG¤W¦¸¶W¹L¨â½ø¡A»İ­n±NlastCount½áÂk
-				meichongfu = true;//½T»{¦³­«½Æ
+				//carCount -= 1;//å¦‚æœä¸Šæ¬¡è¶…éå…©è¼›ï¼Œéœ€è¦å°‡lastCountè³¦æ­¸
+				chongfu = true;//ç¢ºèªé‡è¤‡
 			}
+			lastCount = lineCount; 
+			cout << chongfu <<endl;
 		}
 		putText(frame, to_string(carCount), Point(getData.getPutTextX, getData.getPutTextY), FONT_HERSHEY_COMPLEX,
 			1, Scalar(0, 255, 0));
-
 		imshow("gray_dilate1", frame);
+		
 		waitKey(getData.getWaitKey);
 		count++;
 	}
+
 }

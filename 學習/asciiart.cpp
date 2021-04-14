@@ -1,29 +1,27 @@
 ﻿#include <iostream>
 #include <opencv2/opencv.hpp>
-#include <opencv2/bgsegm.hpp>
 #include "ascii.h"
 #include "tools.h"
+#include "string.h"
 #include <windows.h>
 #include <nlohmann/json.hpp>
 
 using namespace cv;
-using namespace dnn;
 using namespace std;
-using namespace cv::bgsegm;
 using json = nlohmann::json;
 
-AsciiArt::AsciiArt(string inputDir, string saveDir = nullptr) : inputDir_(std::move(inputDir)),
-saveDir_(std::move(saveDir)) {
-	this->inputDir_ = inputDir_;
-	this->saveDir_ = saveDir_ + ".mp4";
+AsciiArt::AsciiArt(string inputDir, string saveDir = nullptr) {
+	this->inputDir = inputDir;
+	this->saveDir = saveDir + ".mp4";
+	this->run = "sound.exe " + this->saveDir + " " +  this->inputDir;
 	this->lv = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 }
 
 void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	setUseOptimized(1);
-	VideoCapture cap(this->inputDir_);
+	VideoCapture cap(this->inputDir);
 	if (!cap.isOpened())
-		std::cerr << "ERROR: Could not open video " << this->inputDir_ << endl;
+		std::cerr << "ERROR: Could not open video " << this->inputDir << endl;
 	system("cls");
 	this->cap = cap;
 	this->frameCount = cap.get(CAP_PROP_FRAME_COUNT);		   //設置總張數
@@ -38,7 +36,6 @@ void AsciiArt::asciiArt() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), Size(237, 62));
 	time_t c_start, t_start = time(NULL);
 	int error = 0;
-
 	while (this->cap.isOpened()) {
 		c_start = clock();
 		string str;
@@ -63,10 +60,11 @@ void AsciiArt::asciiArt() {
 
 void AsciiArt::advascii() {
 	//初始化各項數據
+
 	initVideo(); //導入影片
 	auto count = 0.0; //設置進度
 	Point origin;
-	VideoWriter writerMp4(this->saveDir_, this->encoding, this->frameFPS, this->setVideoSize);
+	VideoWriter writerMp4(this->saveDir, this->encoding, this->frameFPS, this->setVideoSize);
 	//主程式
 	const time_t t_start = time(nullptr);
 	while (this->cap.isOpened()) {
@@ -94,6 +92,8 @@ void AsciiArt::advascii() {
 	}
 	writerMp4.release();
 	int totalTime = difftime(time(NULL), t_start);
+	system(this->run.c_str());
+	remove(this->saveDir.c_str());
 	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
 }
 
@@ -102,7 +102,7 @@ void AsciiArt::advart() {
 	time_t t_start, t_end;
 	int count = 0;
 	initVideo(Size(1008, 560), Size(125, 35));
-	VideoWriter writer(this->saveDir_, this->encoding, this->frameFPS, this->setVideoSize);
+	VideoWriter writer(this->saveDir, this->encoding, this->frameFPS, this->setVideoSize);
 	t_start = time(NULL);
 	while (this->cap.isOpened()) {
 		Mat frame;
@@ -126,5 +126,6 @@ void AsciiArt::advart() {
 	writer.release();
 	t_end = time(NULL);
 	int totalTime = difftime(t_end, t_start);
+	remove(this->saveDir.c_str());
 	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
 }
