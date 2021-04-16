@@ -24,19 +24,16 @@ int main() try {
 							\n(5)使用AI來變換臉部, (6)普通道路辨識車輛 (7)高速公路辨識車輛 \n輸入:  ");
 	auto switchVal = static_cast<choicecase>(convert<int>(getInput));
 
-	string file, imgPath, compareImg, save;
+	string file, imgPath, compareImg;
 	vector<int>getData;
 	file = input("開啟檔案名稱: ");
-	
-	if (switchVal != CREATE_JSON &&
-		switchVal != ASCIIART &&
-		switchVal != COMPARE_IMG &&
-		switchVal != DETECTION_CAR1 &&
-		switchVal != DETECTION_CAR2) {
-		save = input("請指定儲存名稱: ");
+
+	if (file.find("https") != std::string::npos) {
+		system(("download.exe " + file).c_str());
+		file = "HTC.mp4";
 	}
 	
-	AsciiArt ascii_art(file, save);
+	AsciiArt ascii_art(file, "temp_video");
 	switch (switchVal) {
 	case CREATE_JSON:
 		createJson(file, "json\\0.json");
@@ -48,6 +45,7 @@ int main() try {
 			getData[0] / 30 / 60, getData[0] / 30 % 60);
 		break;
 	case ASCIIART:
+		system(("start " + file).c_str());
 		ascii_art.asciiArt();
 		break;
 	case EXPORT_ASCIIART:
