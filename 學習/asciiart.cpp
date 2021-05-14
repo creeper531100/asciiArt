@@ -2,7 +2,6 @@
 #include <opencv2/opencv.hpp>
 #include "ascii.h"
 #include "tools.h"
-#include "string.h"
 #include <windows.h>
 #include <nlohmann/json.hpp>
 
@@ -13,7 +12,7 @@ using json = nlohmann::json;
 AsciiArt::AsciiArt(string inputDir, string saveDir = nullptr) {
 	this->inputDir = inputDir;
 	this->saveDir = saveDir + ".mp4";
-	this->run = "sound.exe " + this->saveDir + " " +  this->inputDir;
+	this->run = "ffmpeg -i temp_video.mp4 -i "+ this->inputDir + " -c copy -map 0:v:0 -map 1:a:0 output.mp4";
 	this->lv = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 }
 
@@ -33,9 +32,15 @@ void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 }
 
 void AsciiArt::asciiArt() {
-	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), Size(237, 62));
-	time_t c_start, t_start = time(NULL);
+	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), Size(237, 64));
+	int nScreenWidth = 237; // 237x64
+	int nScreenHeight = 63;
 	int error = 0;
+	time_t c_start, t_start = time(NULL);
+	wchar_t* screen = new wchar_t[nScreenWidth * nScreenHeight];
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	DWORD dwBytesWritten = 0;
 	while (this->cap.isOpened()) {
 		c_start = clock();
 		string str;
@@ -44,23 +49,18 @@ void AsciiArt::asciiArt() {
 		if (frame.empty()) break;
 		resize(frame, frame, this->dsize, 0, 0, INTER_CUBIC);
 		cvtColor(frame, frame, COLOR_RGB2GRAY);
-		for (int i = 0; i < 62; i++) {
-			for (int j = 0; j < 237; j++) {
-				str.push_back(this->lv[frame.at<uchar>(i, j) / 4]);
-			}
-			str.push_back('\n');
+		for (int j = 0; j < nScreenWidth * nScreenHeight; j++) {
+			screen[j] = this->lv[frame.at<uchar>(j) / 4];
 		}
+		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0, 0 }, &dwBytesWritten);
 		printf("%s", str.c_str());
 		int delay = difftime(clock(), c_start);
 		delay < 30 ? Sleep(30 - delay) : void(error++);
 	}
-	int totalTime = difftime(time(NULL), t_start);
-	printf("used %02d:%02d\nerror:%d", totalTime / 60, totalTime % 60, error);
 }
 
 void AsciiArt::advascii() {
 	//初始化各項數據
-
 	initVideo(); //導入影片
 	auto count = 0.0; //設置進度
 	Point origin;
@@ -70,17 +70,18 @@ void AsciiArt::advascii() {
 	while (this->cap.isOpened()) {
 		Mat frame;
 		this->cap >> frame;
-		Mat image = Mat::zeros(this->setVideoSize, CV_8UC4);
+		Mat image = Mat::zeros(this->setVideoSize, CV_8U);
 		image.setTo(Scalar(0, 0, 0));
 		if (frame.empty()) break;
-		resize(frame, frame, this->dsize, 0, 0, INTER_CUBIC);
+		resize(frame, frame, this->dsize);
 		cvtColor(frame, frame, COLOR_RGB2GRAY);
 		origin.y = 5;
 		for (int i = 0; i < 71; i++) {
 			origin.y += 15;
 			for (int j = 0; j < 158; j++) {
 				origin.x += 12;
-				string showStr = convert<string>(this->lv[frame.at<uchar>(i, j) / 4]);
+				string showStr = "";
+				showStr += this->lv[frame.at<uchar>(i, j) / 4];	
 				putText(image, showStr, origin, FONT_HERSHEY_SIMPLEX,
 					0.5, Scalar(255, 255, 255),
 					1, 8, 0);
@@ -91,13 +92,51 @@ void AsciiArt::advascii() {
 		printf("進度: %f%%/%f\r", (count++ / this->frameCount) * 100, difftime(time(NULL), t_start));
 	}
 	writerMp4.release();
-	int totalTime = difftime(time(NULL), t_start);
 	system(this->run.c_str());
 	remove(this->saveDir.c_str());
-	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
+	int totalTime = difftime(time(NULL), t_start);
+	printf("\nused %02d:%02d", totalTime / 60, totalTime % 60);
 }
 
-void AsciiArt::advart() {
+void AsciiArt::advart(bool fill_color, string fill_word) {
+	initVideo();
+	VideoWriter writerMp4(this->saveDir, this->encoding, this->frameFPS, this->setVideoSize);
+	auto count = 0.0; //設置進度
+	Point origin;
+	const time_t t_start = time(nullptr);
+	while (this->cap.isOpened()) {
+		Mat frame, gray;
+		this->cap >> frame;
+		Mat image = Mat::zeros(this->setVideoSize, CV_8UC4);
+		image.setTo(Scalar(0, 0, 0));
+		if (frame.empty()) break;
+		resize(frame, frame, this->dsize);
+		cvtColor(frame, gray, COLOR_RGB2GRAY);
+		origin.y = 5;
+		for (int i = 0; i < 71; i++) {
+			origin.y += 15;
+			for (int j = 0; j < 158; j++) {
+				origin.x += 12;
+				string showStr = "";
+				fill_color ? showStr = fill_word : showStr += this->lv[gray.at<uchar>(i, j) / 4];
+				putText(image, showStr, origin, FONT_HERSHEY_SIMPLEX,
+					0.5, Scalar(frame.at<Vec3b>(i, j)[0], 
+					frame.at<Vec3b>(i, j)[1], frame.at<Vec3b>(i, j)[2]),
+					1, 8, 0);
+			}
+			origin.x = 0;
+		}
+		writerMp4.write(image);
+		printf("進度: %f%%/%f\r", (count++ / this->frameCount) * 100, difftime(time(NULL), t_start));
+	}
+	writerMp4.release();
+	system(this->run.c_str());
+	remove(this->saveDir.c_str());
+	int totalTime = difftime(time(NULL), t_start);
+	printf("\nused %02d:%02d", totalTime / 60, totalTime % 60);
+}
+
+/*void AsciiArt::advart() {
 	string path;
 	time_t t_start, t_end;
 	int count = 0;
@@ -125,7 +164,8 @@ void AsciiArt::advart() {
 	}
 	writer.release();
 	t_end = time(NULL);
-	int totalTime = difftime(t_end, t_start);
+	system(this->run.c_str());
 	remove(this->saveDir.c_str());
+	int totalTime = difftime(t_end, t_start);
 	printf("used %02d:%02d", totalTime / 60, totalTime % 60);
-}
+}*/

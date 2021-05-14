@@ -14,22 +14,24 @@ enum choicecase {
 	ASCIIART,
 	EXPORT_ASCIIART,
 	ADV_EXPORT_ASCIIART,
+	ADV_EXPORT_FILL_ASCIIART,
 	DETECTION_FACE,
 	DETECTION_CAR1,
 	DETECTION_CAR2
 };
 
 int main() try {
-	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術(匯出影片) (4).Ascii藝術-2(匯出影片(自訂文字); 不建議使用，除非你對字體有要求)\n\
-							\n(5)使用AI來變換臉部, (6)普通道路辨識車輛 (7)高速公路辨識車輛 \n輸入:  ");
+	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術-2(匯出影片) (4).Ascii藝術-3(匯出彩色影片)\n\
+							\n(6)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 \n輸入:  ");
 	auto switchVal = static_cast<choicecase>(convert<int>(getInput));
 
-	string file, imgPath, compareImg;
+	string file, imgPath, compareImg, fill_word;
 	vector<int>getData;
 	file = input("開啟檔案名稱: ");
 
 	if (file.find("https") != std::string::npos) {
-		system(("download.exe " + file).c_str());
+		remove("HTC.mp4");
+		system(("youtube-dl -o HTC.%(ext)s -f mp4 " + file).c_str());
 		file = "HTC.mp4";
 	}
 	
@@ -45,14 +47,17 @@ int main() try {
 			getData[0] / 30 / 60, getData[0] / 30 % 60);
 		break;
 	case ASCIIART:
-		system(("start " + file).c_str());
 		ascii_art.asciiArt();
 		break;
 	case EXPORT_ASCIIART:
 		ascii_art.advascii();
 		break;
 	case ADV_EXPORT_ASCIIART:
-		ascii_art.advart();
+		ascii_art.advart(0, "");
+		break;
+	case ADV_EXPORT_FILL_ASCIIART:
+		fill_word = input("選擇填充字體: ");
+		ascii_art.advart(1, fill_word);
 		break;
 	case DETECTION_FACE:
 		ascii_art.network();
