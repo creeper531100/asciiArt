@@ -48,6 +48,9 @@
     <ClCompile Include="initData.cpp">
       <Filter>video_process</Filter>
     </ClCompile>
+    <ClCompile Include="get_word.cpp">
+      <Filter>video_process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="string.h">

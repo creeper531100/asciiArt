@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClCompile Include="asciiart.cpp" />
     <ClCompile Include="detection.cpp" />
+    <ClCompile Include="get_word.cpp" />
     <ClCompile Include="initData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="operator.cpp" />

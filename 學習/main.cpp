@@ -1,4 +1,5 @@
-﻿#include <opencv2/opencv.hpp>
+﻿#include <windows.h>
+#include <opencv2/opencv.hpp>
 #include "ascii.h"
 #include "string.h"
 #include "tools.h"
@@ -17,12 +18,12 @@ enum choicecase {
 	ADV_EXPORT_FILL_ASCIIART,
 	DETECTION_FACE,
 	DETECTION_CAR1,
-	DETECTION_CAR2
+	DETECTION_CAR2,
+	ASCIIART_ADV
 };
 
 int main() try {
-	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術-2(匯出影片) (4).Ascii藝術-3(匯出彩色影片)\n\
-							\n(6)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 \n輸入:  ");
+	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術-2(匯出影片) (4).Ascii藝術-3(匯出彩色影片) (5).Ascii藝術-4(單一文字)\n(6)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 (9)盲人藝術\n輸入:  ");
 	auto switchVal = static_cast<choicecase>(convert<int>(getInput));
 
 	string file, imgPath, compareImg, fill_word;
@@ -67,6 +68,9 @@ int main() try {
 		break;
 	case DETECTION_CAR2:
 		ascii_art.detectionCar2();
+		break;
+	case ASCIIART_ADV:
+		ascii_art.asciiAdvArt();
 		break;
 	}
 	system("pause");

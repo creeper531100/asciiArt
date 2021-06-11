@@ -2,17 +2,19 @@
 #include <opencv2/opencv.hpp>
 #ifndef ASCIIART_H 
 #define ASCIIART_H
-
 using namespace std;
 
 string aHash(cv::Mat);
 vector<int> cmpHash(string, string);
 void createJson(string, string);
 
+
 class AsciiArt {
 public:
 	AsciiArt(string, string);
+	void init_word();
 	void asciiArt();
+	void asciiAdvArt();
 	void advascii();
 	void advart(bool, string);
 	void network();
@@ -26,6 +28,7 @@ private:
 	void initVideo(cv::Size setVideoSize = cv::Size(1920, 1080),
 		cv::Size setDsize = cv::Size(158, 71));
 	string lv;
+	map<string, wchar_t> map_pairs;
 	double frameCount;
 	double frameFPS;
 	int encoding;

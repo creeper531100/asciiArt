@@ -1,8 +1,12 @@
-﻿#include <iostream>
+﻿#include <codecvt>
+#include <iostream>
 #include <opencv2/opencv.hpp>
 #include "ascii.h"
 #include "tools.h"
 #include <windows.h>
+#include <fstream>
+#include <wchar.h>
+#include <locale.h>
 #include <nlohmann/json.hpp>
 
 using namespace cv;
@@ -28,15 +32,15 @@ void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	this->encoding = VideoWriter::fourcc('D', 'I', 'V', 'X');//設置編碼
 	this->setVideoSize = setVideoSize;
 	this->getVideoSize = Size(cap.get(CAP_PROP_FRAME_WIDTH), cap.get(CAP_PROP_FRAME_HEIGHT));//設置影片解析度
-	this->dsize = setDsize;			   //設置壓縮解析度
+	this->dsize = setDsize;//設置壓縮解析度
 }
 
 void AsciiArt::asciiArt() {
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), Size(237, 64));
 	int nScreenWidth = 237; // 237x64
-	int nScreenHeight = 63;
+	int nScreenHeight = 64;
 	int error = 0;
-	time_t c_start, t_start = time(NULL);
+	time_t c_start = time(NULL);
 	wchar_t* screen = new wchar_t[nScreenWidth * nScreenHeight];
 	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(hConsole);
@@ -57,6 +61,78 @@ void AsciiArt::asciiArt() {
 		int delay = difftime(clock(), c_start);
 		delay < 30 ? Sleep(30 - delay) : void(error++);
 	}
+	delete[] screen;
+}
+
+void AsciiArt::asciiAdvArt() {
+	SetConsoleOutputCP(CP_UTF8);
+	setlocale(LC_ALL, "");
+
+	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), 
+		Size(240, 120));
+	const int nScreenWidth = 240; // 237x64
+	const int nScreenHeight = 120;
+	int error = 0;
+	time_t c_start = time(NULL);
+	
+	const wchar_t* screen = new wchar_t[nScreenWidth * nScreenHeight];
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	DWORD dwBytesWritten = 0;
+	
+	while (this->cap.isOpened()) {
+		init_word();
+		c_start = clock();
+		vector<vector<string>> deep_arr;
+		Mat frame;
+		this->cap >> frame;
+		if (frame.empty()) break;
+		resize(frame, frame, this->dsize, 0, 0, INTER_CUBIC);
+		cvtColor(frame, frame, COLOR_RGB2GRAY);
+		
+		for (int i = 0; i < nScreenHeight; i++) {
+			vector<string> deep;
+
+			Scalar avg = mean(frame);
+			/*int avg = 0;
+			for (int i = 0; i < nScreenHeight; i++)
+				for (int j = 0; j < nScreenWidth; j++)
+					avg += frame.at<uchar>(i, j);
+			avg /= nScreenHeight * nScreenWidth;*/
+			
+			for (int j = 1; j < nScreenWidth; j+=2) {
+				if (frame.at<uchar>(i, j - 1) > avg.val[0]) {
+					if (frame.at<uchar>(i, j) > avg.val[0])
+						deep.emplace_back("m");
+					else
+						deep.emplace_back("y");
+				}
+				else {
+					if (frame.at<uchar>(i, j) > avg.val[0])
+						deep.emplace_back("z");
+					else
+						deep.emplace_back("k");
+				}
+			}
+			deep_arr.emplace_back(deep);
+		}
+		
+		wstring basic_string = L"";
+		for (int i = 3; i < deep_arr.size(); i+=4) {
+			for (int j = 0; j < nScreenHeight; j ++) {
+				basic_string.push_back(this->map_pairs[deep_arr[i - 3][j] + deep_arr[i - 2][j] + deep_arr[i - 1][j] + deep_arr[i][j]]);
+			}
+		}
+		
+		//wchar_t* ptr = _wcsdup(wstri.c_str());
+		screen = basic_string.c_str();
+		WriteConsoleOutputCharacterW(hConsole, screen, nScreenWidth * nScreenHeight, { 0, 0 }, &dwBytesWritten);
+		int delay = difftime(clock(), c_start);
+		delay < 30 ? Sleep(30 - delay) : void(error++);
+		//swprintf_s(screen, 40, L"delay: %d", delay);
+	}
+	delete[] screen;
+	cout << error;
 }
 
 void AsciiArt::advascii() {
