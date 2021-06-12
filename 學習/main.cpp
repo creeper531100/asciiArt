@@ -4,6 +4,7 @@
 #include "string.h"
 #include "tools.h"
 #include <nlohmann/json.hpp>
+#include <opencv2/core/ocl.hpp>
 
 using namespace cv;
 using namespace dnn;
@@ -19,13 +20,17 @@ enum choicecase {
 	DETECTION_FACE,
 	DETECTION_CAR1,
 	DETECTION_CAR2,
-	ASCIIART_ADV
+	ASCIIART_ADV,
+	BEAUTIFUL_ART,
+	BEAUTIFUL_ADV
 };
 
 int main() try {
-	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術-2(匯出影片) (4).Ascii藝術-3(匯出彩色影片) (5).Ascii藝術-4(單一文字)\n(6)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 (9)盲人藝術\n輸入:  ");
+	string getInput = input("歡迎使用查圖程式\n(0).指紋化 (1).計算相似度 \n(2).Ascii藝術-1(及時處理) (3).Ascii藝術-2(匯出影片) (4).Ascii藝術-3(匯出彩色影片) (5).Ascii藝術-4(單一文字)\n(6)使用AI來變換臉部, (7)普通道路辨識車輛 (8)高速公路辨識車輛 (9)盲人藝術 (10)漂亮asciiart (11)輸出盲人\n輸入:  ");
 	auto switchVal = static_cast<choicecase>(convert<int>(getInput));
 
+	setUseOptimized(1);
+	ocl::setUseOpenCL(1);
 	string file, imgPath, compareImg, fill_word;
 	vector<int>getData;
 	file = input("開啟檔案名稱: ");
@@ -48,6 +53,7 @@ int main() try {
 			getData[0] / 30 / 60, getData[0] / 30 % 60);
 		break;
 	case ASCIIART:
+		system(("start " + file).c_str());
 		ascii_art.asciiArt();
 		break;
 	case EXPORT_ASCIIART:
@@ -70,7 +76,14 @@ int main() try {
 		ascii_art.detectionCar2();
 		break;
 	case ASCIIART_ADV:
+		system(("start " + file).c_str());
 		ascii_art.asciiAdvArt();
+		break;
+	case BEAUTIFUL_ART:
+		ascii_art.beautifulart();
+		break;
+	case BEAUTIFUL_ADV:
+		ascii_art.beautiadv();
 		break;
 	}
 	system("pause");

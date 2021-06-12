@@ -17,7 +17,6 @@ void AsciiArt::network() {
 		NET_SIMILAR = 2, NET_ROWS = 2, NET_COLS = 3, NET_X0 = 3, NET_Y0, NET_X1, NET_Y1
 	};
 	Net net = readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel");
-	setUseOptimized(true);
 	int count = 0;
 	vector<vector<int>> point;
 	vector<int> xy, numArr;

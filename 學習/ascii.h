@@ -17,6 +17,8 @@ public:
 	void asciiAdvArt();
 	void advascii();
 	void advart(bool, string);
+	void beautifulart();
+	void beautiadv();
 	void network();
 	void detectionCar1();
 	void detectionCar2();
