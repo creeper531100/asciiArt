@@ -22,6 +22,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="video_process\priview_ascii">
+      <UniqueIdentifier>{990891e1-ffae-4ae3-a042-b832eee43d20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="video_process\output_video">
+      <UniqueIdentifier>{560af51b-2717-4e25-9815-1246e9e2463e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="operator.cpp">
@@ -50,6 +56,15 @@
     </ClCompile>
     <ClCompile Include="get_word.cpp">
       <Filter>video_process</Filter>
+    </ClCompile>
+    <ClCompile Include="priview_ascii.cpp">
+      <Filter>video_process\priview_ascii</Filter>
+    </ClCompile>
+    <ClCompile Include="output_video.cpp">
+      <Filter>video_process\output_video</Filter>
+    </ClCompile>
+    <ClCompile Include="beautiful_out.cpp">
+      <Filter>video_process\output_video</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,6 @@ void createJson(string, string);
 class AsciiArt {
 public:
 	AsciiArt(string, string);
-	void init_word();
 	void asciiArt();
 	void asciiAdvArt();
 	void advascii();
@@ -22,10 +21,17 @@ public:
 	void network();
 	void detectionCar1();
 	void detectionCar2();
+	wchar_t* screen;
+	cv::Size dsize;
 private:
+	void run_ascii_art(function<void()>, cv::Mat*);
+	void print_output_info(time_t);
+	vector<vector<string>>&& braille_create(cv::Size&, cv::Mat*);
+	void init_word();
 	string inputDir;
 	string saveDir;
 	string run;
+	int frame_interval;
 	cv::VideoCapture cap;
 	void initVideo(cv::Size setVideoSize = cv::Size(1920, 1080),
 		cv::Size setDsize = cv::Size(158, 71));
@@ -36,6 +42,5 @@ private:
 	int encoding;
 	cv::Size setVideoSize;
 	cv::Size getVideoSize;
-	cv::Size dsize;
 };
 #endif

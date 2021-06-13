@@ -163,11 +163,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="asciiart.cpp" />
+    <ClCompile Include="beautiful_out.cpp" />
     <ClCompile Include="detection.cpp" />
     <ClCompile Include="get_word.cpp" />
     <ClCompile Include="initData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="operator.cpp" />
+    <ClCompile Include="output_video.cpp" />
+    <ClCompile Include="priview_ascii.cpp" />
     <ClCompile Include="similar.cpp" />
     <ClCompile Include="string_fun.cpp" />
     <ClCompile Include="tool.cpp" />
