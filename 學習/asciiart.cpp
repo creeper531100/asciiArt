@@ -27,7 +27,7 @@ void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	this->frameFPS = cap.get(CAP_PROP_FPS);					  //設置FPS
 	this->encoding = VideoWriter::fourcc('D', 'I', 'V', 'X');//設置編碼
 	this->setVideoSize = setVideoSize;
-	this->frame_interval = (1 / this->frameFPS) * 1000;
+	this->frame_interval = (1 / this->frameFPS) * 1000000;
 	this->getVideoSize = Size(cap.get(CAP_PROP_FRAME_WIDTH), cap.get(CAP_PROP_FRAME_HEIGHT));//設置影片解析度
 	this->dsize = setDsize;//設置壓縮解析度
 }
