@@ -21,13 +21,15 @@ public:
 	void network();
 	void detectionCar1();
 	void detectionCar2();
-	wchar_t* screen;
-	cv::Size dsize;
 private:
 	void run_ascii_art(function<void()>, cv::Mat*);
 	void print_output_info(time_t);
 	vector<vector<string>>&& braille_create(cv::Size&, cv::Mat*);
 	void init_word();
+	
+	wchar_t* screen;
+	cv::Size dsize;
+
 	string inputDir;
 	string saveDir;
 	string run;
