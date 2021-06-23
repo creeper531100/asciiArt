@@ -11,7 +11,7 @@ void mask_img(Mat* pFrame) {
 	Canny(*pFrame, *pFrame, avg_color, avg_color);
 	inRange(*pFrame, Scalar(0, 0, 0), Scalar(254, 254, 254), *pFrame);
 }
-
+//A
 void AsciiArt::beautifulart() {
 	time_t t_start = time(NULL);
 	int count = 0;
