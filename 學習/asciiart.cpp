@@ -13,10 +13,10 @@ using json = nlohmann::json;
 AsciiArt::AsciiArt(string inputDir, string saveDir = nullptr) {
 	this->inputDir = inputDir;
 	this->saveDir = saveDir + ".mp4";
-	this->run = "ffmpeg -i temp_video.mp4 -i "+ this->inputDir + " -c copy -map 0:v:0 -map 1:a:0 output.mp4";
+	this->run = "ffmpeg -i temp_video.mp4 -i " + this->inputDir + " -c copy -map 0:v:0 -map 1:a:0 output.mp4";
 	this->lv = " .'`^,:;l!i><~+_--?][}{)(|/rxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 }
-
+//a
 void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	VideoCapture cap(this->inputDir);
 	if (!cap.isOpened())
@@ -27,7 +27,7 @@ void AsciiArt::initVideo(Size setVideoSize, Size setDsize) {
 	this->frameFPS = cap.get(CAP_PROP_FPS);					  //設置FPS
 	this->encoding = VideoWriter::fourcc('D', 'I', 'V', 'X');//設置編碼
 	this->setVideoSize = setVideoSize;
-	this->frame_interval = (1 / this->frameFPS) * 1000;
+	this->frame_interval = (1 / this->frameFPS) * 1000000;
 	this->getVideoSize = Size(cap.get(CAP_PROP_FRAME_WIDTH), cap.get(CAP_PROP_FRAME_HEIGHT));//設置影片解析度
 	this->dsize = setDsize;//設置壓縮解析度
 }
@@ -72,4 +72,17 @@ void AsciiArt::print_output_info(time_t t_start) {
 	remove(this->saveDir.c_str());
 	int totalTime = difftime(time(NULL), t_start);
 	printf("\nused %02d:%02d", totalTime / 60, totalTime % 60);
+}
+
+HANDLE&& handle_console(wchar_t** screen, cv::Size& dsize) {
+	*screen = new wchar_t[dsize.area()];
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	return move(hConsole);
+}
+
+HANDLE&& handle_console() {
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	return move(hConsole);
 }

@@ -10,11 +10,11 @@ void AsciiArt::advascii() {
 	Point origin;
 	Size video_setting_size = Size(158, 71);
 	VideoWriter writerMp4(this->saveDir, this->encoding, this->frameFPS, this->setVideoSize);
-	
+
 	Mat image;
 	string showStr = "";
 
-	Mat *pFrame = new Mat;
+	Mat* pFrame = new Mat;
 	run_ascii_art([&]() {
 		image = Mat(this->setVideoSize, CV_8U, USAGE_ALLOCATE_DEVICE_MEMORY);
 		image.setTo(Scalar(0, 0, 0));
@@ -32,7 +32,7 @@ void AsciiArt::advascii() {
 		}
 		writerMp4.write(image);
 		printf("¶i«×: %f%%\r", (count++ / this->frameCount) * 100);
-	}, pFrame);
+		}, pFrame);
 	writerMp4.release();
 	print_output_info(t_start);
 }

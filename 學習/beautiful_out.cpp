@@ -4,6 +4,14 @@
 using namespace cv;
 using namespace std;
 
+void mask_img(Mat* pFrame) {
+	Mat contours, hierarchy;
+	Scalar avg = mean(*pFrame);
+	int avg_color = avg.val[0];
+	Canny(*pFrame, *pFrame, avg_color, avg_color);
+	inRange(*pFrame, Scalar(0, 0, 0), Scalar(254, 254, 254), *pFrame);
+}
+
 void AsciiArt::beautifulart() {
 	time_t t_start = time(NULL);
 	int count = 0;
@@ -28,13 +36,13 @@ void AsciiArt::beautifulart() {
 		}
 		writer.write(vertical);
 		printf("進度: %f%%/%f %d %d\r", (count++ / this->frameCount) * 100, difftime(time(NULL), t_start), vertical.cols, vertical.rows);
-	}, pFrame);
+		}, pFrame);
 
 	writer.release();
 	print_output_info(t_start);
 }
 
-void AsciiArt::beautiadv() {
+void AsciiArt::beautiadv(int sw) {
 	time_t t_start = time(NULL);
 	int count = 0;
 	Size video_setting_size = Size(480, 240);
@@ -48,12 +56,13 @@ void AsciiArt::beautiadv() {
 		Advstring spilit(row);
 		img[spilit.split("\\")[2]] = imread(row);
 	}
-	
+
 	Mat* pFrame = new Mat;
 	run_ascii_art([&]() {
 		Mat vertical, horizontal;
+		if (sw == 1)
+			mask_img(pFrame);
 		vector<vector<string>> deep_arr = braille_create(video_setting_size, pFrame);
-
 		for (int i = 3; i < deep_arr.size(); i += 4) {
 			horizontal = img["kkkk.png"];
 			for (int j = 0; j < video_setting_size.height; j++)
@@ -62,7 +71,8 @@ void AsciiArt::beautiadv() {
 		}
 		writer.write(vertical);
 		printf("進度: %f%%/%f %d %d\r", (count++ / this->frameCount) * 100, difftime(time(NULL), t_start), vertical.cols, vertical.rows);
-	}, pFrame);
+		}, pFrame);
 	writer.release();
 	print_output_info(t_start);
 }
+
