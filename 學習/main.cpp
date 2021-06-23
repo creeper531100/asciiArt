@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) try {
 	string file, imgPath, compareImg, fill_word;
 	vector<int>getData;
 
-	if (argc <= 3) {
+	if (argc <= 2) {
 		file = input("請輸入檔案名稱或是網址: ");
 	}
 	else {
