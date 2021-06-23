@@ -11,6 +11,13 @@ void video_interval(chrono::time_point<chrono::system_clock>* c_start, int& fram
 	*c_start = chrono::system_clock::now();
 }
 
+HANDLE&& handle_console(wchar_t** screen, cv::Size& dsize) {
+	*screen = new wchar_t[dsize.area()];
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	return move(hConsole);
+}
+
 void AsciiArt::asciiArt() {
 	Size video_setting_size = Size(237, 64);
 	initVideo(Size(CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT), video_setting_size);

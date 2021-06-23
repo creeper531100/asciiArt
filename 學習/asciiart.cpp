@@ -73,16 +73,3 @@ void AsciiArt::print_output_info(time_t t_start) {
 	int totalTime = difftime(time(NULL), t_start);
 	printf("\nused %02d:%02d", totalTime / 60, totalTime % 60);
 }
-
-HANDLE&& handle_console(wchar_t** screen, cv::Size& dsize) {
-	*screen = new wchar_t[dsize.area()];
-	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	SetConsoleActiveScreenBuffer(hConsole);
-	return move(hConsole);
-}
-
-HANDLE&& handle_console() {
-	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	SetConsoleActiveScreenBuffer(hConsole);
-	return move(hConsole);
-}

@@ -8,7 +8,6 @@
 using namespace std;
 
 string input(string&&);
-HANDLE&& handle_console(wchar_t**, cv::Size&);
 
 // println格式輸出(換行)----------------------------------
 template <typename T>
