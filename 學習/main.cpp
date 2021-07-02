@@ -22,7 +22,8 @@ enum choicecase {
 	ASCIIART_ADV,
 	BEAUTIFUL_ART,
 	BEAUTIFUL_ADV,
-	BEAUTIFUL_ADV_ADV
+	BEAUTIFUL_ADV_ADV,
+	PRINTF
 };
 
 int main(int argc, char* argv[]) try {
@@ -101,7 +102,19 @@ int main(int argc, char* argv[]) try {
 	case BEAUTIFUL_ADV_ADV:
 		ascii_art.beautiadv(1);
 		break;
+	case PRINTF:
+		Mat img_mat = imread(file);
+		Mat relief2(img_mat.size(), CV_8UC3);
+		for (int i = 1; i < img_mat.size().area(); i++) {
+			for (int k = 0; k < 3; k++) {
+				int res2 = img_mat.at<Vec3b>(i + 1)[k] - img_mat.at<Vec3b>(i - 1)[k] + 128;
+				relief2.at<Vec3b>(i)[k] = saturate_cast<uchar>(res2);
+			}
+		}
+		imwrite("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\128.PNG", relief2);
+		break;
 	}
+
 	system("pause");
 	return 0;
 }
@@ -109,3 +122,44 @@ catch (exception& e) {
 	cerr << e.what();
 	return -1;
 }
+
+
+/*cvtColor(img_mat, img_mat, COLOR_BGR2GRAY);
+VideoWriter writer("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\video.mp4", VideoWriter::fourcc('D', 'I', 'V', 'X'), 24, Size(img_mat.cols, img_mat.rows));
+for (int i = 0; i < 256; i++) {
+	Mat cv_mat;
+	threshold(img_mat, cv_mat, i, 255, THRESH_BINARY);
+	writer.write(cv_mat);
+	imwrite("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\"+ to_string(i) +".PNG", cv_mat);
+}
+writer.release();*/
+
+/*Mat img_mat = imread(file);
+VideoWriter writer("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\video.mp4", VideoWriter::fourcc('D', 'I', 'V', 'X'), 24, img_mat.size());
+for (int j = 0; j < 256; j++) {
+	Mat relief2(img_mat.size(), CV_8UC3);
+	for (int i = 1; i < img_mat.size().area(); i++) {
+		for (int k = 0; k < 3; k++) {
+			int res2 = img_mat.at<Vec3b>(i + 1)[k] - img_mat.at<Vec3b>(i - 1)[k] + j;
+			relief2.at<Vec3b>(i)[k] = saturate_cast<uchar>(res2);
+		}
+	}
+	writer.write(relief2);
+	imwrite("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\" + to_string(j) + ".PNG", relief2);
+}*/
+
+/*for (int j = 1; j < 256; j++) {
+	Mat relief2(img_mat.size(), CV_8UC3);
+	for (int i = j; i < img_mat.size().area(); i += 2) {
+		relief2.at<Vec3b>(i) = img_mat.at<Vec3b>(i - j);
+		relief2.at<Vec3b>(i - 1) = img_mat.at<Vec3b>(i + j);
+	}
+	writer.write(relief2);
+	imwrite("C:\\Users\\creep\\OneDrive\\桌面\\圖\\val\\" + to_string(j) + ".PNG", relief2);
+}*/
+
+/*for (int i = 1; i < img_mat.size().area(); i += 3) {
+	relief2.at<Vec3b>(i)[1] = img_mat.at<Vec3b>(i)[1];
+	relief2.at<Vec3b>(i - 1)[2] = img_mat.at<Vec3b>(i - 1)[2];
+	relief2.at<Vec3b>(i - 2)[3] = img_mat.at<Vec3b>(i - 2)[3];
+}*/

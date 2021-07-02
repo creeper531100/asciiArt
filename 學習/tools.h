@@ -21,7 +21,7 @@ void println(T first, Ts ... rest) {
 	println(rest...); //解包遞迴
 }
 
-//print 格式輸出 -----------------------------------------
+//Print 格式輸出 -----------------------------------------
 inline void print(const char* format) {
 	//遇到不同型態重載輸出
 	cout << format;

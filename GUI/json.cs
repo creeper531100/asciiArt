@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -32,9 +28,12 @@ namespace GUI
         public int colorG { get; set; }
         public int colorB { get; set; }
     }
-    public class PackJson {
-        public string JsonPack(List<TrackBar> trackBarList) {
-            var weatherForecast = new json {
+    public class PackJson
+    {
+        public string JsonPack(List<TrackBar> trackBarList)
+        {
+            var weatherForecast = new json
+            {
                 detectRangeWidth = trackBarList[19].Value,
                 detectRangeHeight = trackBarList[18].Value,
                 triggerLineHeight = trackBarList[17].Value,
